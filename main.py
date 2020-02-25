@@ -20,10 +20,6 @@ YOUR_CHANNEL_SECRET = os.environ["2cf16dd45878f6007335b70f77497f7a"]
 line_bot_api = LineBotApi(YOUR_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(YOUR_CHANNEL_SECRET)
 
-@app.route("/")
-def hello_world():
-   return "hello world!"
-
 @app.route("/callback", methods=['POST'])
 def callback():
    # get X-Line-Signature header value
