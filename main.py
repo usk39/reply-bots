@@ -1,49 +1,54 @@
+# インポートするライブラリ
 from flask import Flask, request, abort
 
 from linebot import (
-   LineBotApi, WebhookHandler
+    LineBotApi, WebhookHandler
 )
 from linebot.exceptions import (
-   InvalidSignatureError
+    InvalidSignatureError
 )
 from linebot.models import (
-   MessageEvent, TextMessage, TextSendMessage,
+    FollowEvent, MessageEvent, TextMessage, TextSendMessage, ImageMessage, ImageSendMessage, TemplateSendMessage, ButtonsTemplate, PostbackTemplateAction, MessageTemplateAction, URITemplateAction
 )
-
 import os
 
+# 軽量なウェブアプリケーションフレームワーク:Flask
 app = Flask(__name__)
 
-YOUR_CHANNEL_ACCESS_TOKEN = os.environ["XXEpXJUIuCa45j7qxDrbT2d/2r4rOrDIyWGYh6apgCCCRjQ+k7igoZnArvQO3Tu/jvsIwPJiQ5ZpynF2MpQfM2hC3IrbYu5J6gVWL002aFxUq1zgT1jJvzWVMXGvAZKSrgTU4oAYgg0FWBFHaSbAywdB04t89/1O/w1cDnyilFU="]
-YOUR_CHANNEL_SECRET = os.environ["2cf16dd45878f6007335b70f77497f7a"]
 
-line_bot_api = LineBotApi(YOUR_CHANNEL_ACCESS_TOKEN)
-handler = WebhookHandler(YOUR_CHANNEL_SECRET)
+#環境変数からLINE Access Tokenを設定
+LINE_CHANNEL_ACCESS_TOKEN = os.environ["LINE_CHANNEL_ACCESS_TOKEN"]
+#環境変数からLINE Channel Secretを設定
+LINE_CHANNEL_SECRET = os.environ["LINE_CHANNEL_SECRET"]
+
+line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
+handler = WebhookHandler(LINE_CHANNEL_SECRET)
 
 @app.route("/callback", methods=['POST'])
 def callback():
-   # get X-Line-Signature header value
-   signature = request.headers['X-Line-Signature']
+    # get X-Line-Signature header value
+    signature = request.headers['X-Line-Signature']
 
-   # get request body as text
-   body = request.get_data(as_text=True)
-   app.logger.info("Request body: " + body)
+    # get request body as text
+    body = request.get_data(as_text=True)
+    app.logger.info("Request body: " + body)
 
-   # handle webhook body
-   try:
-       handler.handle(body, signature)
-   except InvalidSignatureError:
-       print("Invalid signature. Please check your channel access token/channel secret.")
-       abort(400)
+    # handle webhook body
+    try:
+        handler.handle(body, signature)
+    except InvalidSignatureError:
+        abort(400)
 
-   return 'OK'
+    return 'OK'
 
+# MessageEvent
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-   line_bot_api.reply_message(
-       event.reply_token,
-       TextSendMessage(text=event.message.text))
+	line_bot_api.reply_message(
+        event.reply_token,
+        TextSendMessage(text='「' + event.message.text + '」って何？')
+     )
 
 if __name__ == "__main__":
-   port = int(os.getenv("PORT", 5000))
-   app.run(host="0.0.0.0", port=port)
+    port = int(os.getenv("PORT"))
+    app.run(host="0.0.0.0", port=port)
